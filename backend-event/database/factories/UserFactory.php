@@ -29,6 +29,15 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'avatar' => fake()->imageUrl(),
+            'role' => fake()->randomElement(['user', 'admin']),
+            'last_login_at' => fake()->dateTimeThisMonth(),
+            'status' => fake()->randomElement([0, 1]),
+            'sequence' => fake()->numberBetween(0, 100),
+            'version' => 1,
+            'created_user_id' => 1, // Or use a more sophisticated way to get a user ID
+            'updated_user_id' => 1, // Or use a more sophisticated way to get a user ID
+            'phone' => fake()->phoneNumber(),
         ];
     }
 
