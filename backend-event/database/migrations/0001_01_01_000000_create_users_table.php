@@ -31,8 +31,8 @@ return new class extends Migration
             $table->tinyInteger('status')->default(0);
             $table->integer('sequence')->default(0);
             $table->integer('version')->default(1);
-            $table->foreignId('created_user_id')->constrained('users');
-            $table->foreignId('updated_user_id')->constrained('users');
+            $table->foreignId('created_user_id')->nullable()->constrained('users');
+            $table->foreignId('updated_user_id')->nullable()->constrained('users');
             $table->timestamp('deleted_at')->nullable();
             
             // Additional info
