@@ -1,0 +1,20 @@
+CREATE TABLE users ( 
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, 
+    name VARCHAR(255) NOT NULL, 
+    email VARCHAR(255) UNIQUE NOT NULL, 
+    password VARCHAR(255) NOT NULL, 
+    avatar VARCHAR(255) NULL, 
+    role ENUM('user','admin') DEFAULT 'user', 
+    email_verified_at TIMESTAMP NULL, 
+    remember_token VARCHAR(100) NULL, 
+    last_login_at TIMESTAMP NULL, 
+    status TINYINT DEFAULT 0, 
+    sequence INT DEFAULT 0, 
+    version INT DEFAULT 1, 
+    created_user_id INT NOT NULL, 
+    updated_user_id INT NOT NULL, 
+    deleted_at TIMESTAMP NULL, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+    phone VARCHAR(20) NULL 
+); 

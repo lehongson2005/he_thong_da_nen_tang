@@ -1,0 +1,71 @@
+# Du_An_Su_Kien/docker-compose.yml
+
+version: '3.8'
+
+services:
+  # 1. Backend Laravel
+  backend:
+    build:
+      context: ./backend-event
+      dockerfile: Dockerfile
+    container_name: event_backend
+    ports:
+      - "8000:80" # Truy cập web ở http://localhost:8000
+    volumes:
+      - ./backend-event:/var/www/html # Đồng bộ code để sửa ở ngoài, trong tự cập nhật
+    depends_on:
+      - db
+    networks:
+      - event-network
+
+  # 2. Frontend React
+  frontend:
+    build:
+      context: ./frontend-event
+      dockerfile: Dockerfile
+    container_name: event_frontend
+    ports:
+      - "5173:5173" # Truy cập web ở http://localhost:5173
+    volumes:
+      - ./frontend-event:/app
+      - /app/node_modules # Tránh ghi đè node_modules của container
+    networks:
+      - event-network
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Giúp nóng máy (hot reload) hoạt động tốt trên Windows
+
+  # 3. Database MySQL
+  db:
+    image: mysql:8.0
+    container_name: event_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: event_manager
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - event-network
+
+  # 4. phpMyAdmin (Để quản lý DB bằng giao diện cho dễ)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: event_pma
+    ports:
+      - "8080:80" # Truy cập ở http://localhost:8080
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - db
+    networks:
+      - event-network
+
+networks:
+  event-network:
+    driver: bridge
+
+volumes:
+  db_data:
