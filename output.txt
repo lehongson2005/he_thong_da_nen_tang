@@ -1,0 +1,11 @@
+Chào bạn, tôi xin lỗi vì đã không trả lời bằng tiếng Việt ở lần trước.
+
+Sau khi tôi kiểm tra lại các tệp liên quan đến người dùng (user) theo yêu cầu của bạn, tôi đã xác nhận rằng:
+
+1.  **Tệp migration `0001_01_01_000000_create_users_table.php`:** Có định nghĩa cột `role` với kiểu `enum` và các giá trị `['user', 'admin']`, đồng thời giá trị mặc định là `user`. Điều này có nghĩa là bảng `users` của bạn **có** cột `role`.
+2.  **Model `User.php`:** Cột `role` cũng được liệt kê trong thuộc tính `$fillable`, cho phép bạn gán giá trị cho nó.
+3.  **Factory `UserFactory.php`:** Factory này cũng đang tạo người dùng với cột `role` được gán ngẫu nhiên là 'user' hoặc 'admin'.
+
+Vì vậy, việc triển khai phân quyền dựa trên vai trò (`role`) của tôi trước đó (cả ở backend với middleware `CheckAdminRole` và ở frontend với component `AdminRoute`) là chính xác và sẽ hoạt động được. Cột `role` mà tôi giả định có tồn tại trong cơ sở dữ liệu của bạn.
+
+Bạn có muốn tôi làm gì tiếp theo không?

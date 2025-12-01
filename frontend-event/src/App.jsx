@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 
 // --- IMPORTS CÁC TRANG (PAGES) ---
 import Login from "./pages/user/login/login.jsx";
@@ -13,10 +13,22 @@ import AboutPage from "./pages/user/static/AboutPage.jsx";
 import CareersPage from "./pages/user/static/CareersPage.jsx";
 import PrivacyPolicyPage from "./pages/user/static/PrivacyPolicyPage.jsx";
 
+// --- IMPORTS USER PAGES ---
+import Profile from "./pages/user/Profile.jsx"; // Import Profile component
+import AccountInfo from "./pages/user/AccountInfo.jsx"; // Import AccountInfo component
+
+// --- IMPORTS ADMIN PAGES ---
+import BannerManager from "./pages/admin/DashboardBanner/BannerManager.jsx";
+import AddBanner from "./pages/admin/DashboardBanner/AddBanner.jsx";
+import EditBanner from "./pages/admin/DashboardBanner/EditBanner.jsx";
+
+
 // --- IMPORTS LAYOUTS (HEADER & FOOTER) ---
 // Đảm bảo đường dẫn import đúng với thư mục máy bạn
 import Header from "./layouts/user/hearder.jsx";
 import Footer from "./layouts/user/footer.jsx";
+import AdminLayout from "./layouts/admin/AdminLayout.jsx"; // Import AdminLayout
+import AdminRoute from "./components/AdminRoute.jsx"; // Import AdminRoute
 
 // --- CẤU HÌNH LAYOUT CHÍNH (CÓ HEADER + FOOTER) ---
 const MainLayout = () => {
@@ -48,7 +60,7 @@ const AuthLayout = () => {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    
       <Routes>
         
         {/* ========================================================= */}
@@ -70,9 +82,9 @@ export default function App() {
             <Route path="/" element={<Index />} />
             
             {/* Các trang chức năng bên trong */}
-            <Route path="/dashboard" element={<div className="p-10">Dashboard Content</div>} />
+            
             <Route path="/search" element={<div className="p-10">Trang tìm kiếm</div>} />
-            <Route path="/calendar" element={<div className="p-10">Lịch Vạn Niên</div>} />
+            <Route path="/calendar" element={ <div className="p-10">Lịch Vạn Niên</div>} />
             <Route path="/notifications" element={<div className="p-10">Tất cả thông báo</div>} />
 
             {/* Static Pages */}
@@ -83,15 +95,33 @@ export default function App() {
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             
             {/* Profile Routes */}
-            <Route path="/profile/account" element={<div className="p-10">Thông tin tài khoản</div>} />
-            <Route path="/profile/registered-events" element={<div className="p-10">Sự kiện đã đăng ký (Mã QR)</div>} />
-            <Route path="/profile/rewards" element={<div className="p-10">Đổi quà</div>} />
+            <Route path="/profile" element={<Profile />}>
+                <Route index element={<AccountInfo />} /> {/* Default to AccountInfo */}
+                <Route path="account" element={<AccountInfo />} />
+                  </Route>
         </Route>
+
+        {/* ========================================================= */}
+        {/* NHÓM 3: ADMIN ROUTES (SỬ DỤNG ADMIN LAYOUT)              */}
+        {/* ========================================================= */}
+        <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<div className="p-10">Admin Dashboard Content</div>} /> {/* Default admin page */}
+                <Route path="dashboard" element={<div className="p-10">Admin Dashboard Content</div>} />
+                <Route path="users" element={<div className="p-10">User Management</div>} />
+                <Route path="events" element={<div className="p-10">Event Management</div>} />
+                <Route path="banners" element={<BannerManager />} />
+                <Route path="banners/add" element={<AddBanner />} />
+                <Route path="banners/edit/:id" element={<EditBanner />} />
+                <Route path="settings" element={<div className="p-10">Settings Management</div>} />
+            </Route>
+        </Route>
+
 
         {/* Route 404 - Mặc định quay về trang chủ */}
         <Route path="*" element={<Index />} />
         
       </Routes>
-    </BrowserRouter>
+    
   );
 }

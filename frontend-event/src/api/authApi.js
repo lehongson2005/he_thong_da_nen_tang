@@ -6,18 +6,22 @@ const getHeaders = (includeAuth = false) => {
         'Accept': 'application/json',
     };
     if (includeAuth) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log("Token retrieved for headers:", token); // Debugging line
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
     }
+    console.log("Headers being sent:", headers); // Debugging line
     return headers;
 };
 
 async function handleResponse(response) {
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.message || 'Đã có lỗi xảy ra từ API.');
+        const error = new Error(data.message || 'Đã có lỗi xảy ra từ API.');
+        error.status = response.status;
+        throw error;
     }
     return data;
 }
@@ -70,6 +74,14 @@ export const changePassword = async (data) => {
 export const logout = async () => {
     const response = await fetch(`${API_URL}/logout`, {
         method: 'POST',
+        headers: getHeaders(true),
+    });
+    return handleResponse(response);
+};
+
+export const getMe = async () => {
+    const response = await fetch(`${API_URL}/me`, {
+        method: 'GET',
         headers: getHeaders(true),
     });
     return handleResponse(response);

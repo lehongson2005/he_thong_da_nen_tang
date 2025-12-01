@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { login } from "../../../api/authApi";
+import { useAuth } from "../../../contexts/AuthContext"; // Import useAuth
 
 // Icons
 import { FiMail, FiLock } from "react-icons/fi";
@@ -17,6 +18,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false); // State cho Remember me
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate(); // Khởi tạo useNavigate
+  const { refreshUser } = useAuth(); // Sử dụng hook useAuth
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -39,6 +41,7 @@ export default function Login() {
         sessionStorage.setItem("token", data.token);
       }
       
+      await refreshUser(); // Cập nhật lại thông tin user trong AuthContext
       toast.success("Login successful!", { autoClose: 1500 });
       setTimeout(() => {
         navigate("/"); // Chuyển hướng về trang chủ

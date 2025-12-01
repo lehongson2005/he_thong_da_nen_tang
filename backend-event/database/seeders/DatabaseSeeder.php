@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $user = \App\Models\User::factory()->create([
             'name' => 'Hong Son',
             'email' => 'hongson@example.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('123456'),
+            'password' => \Illuminate\Support\Facades\Hash::make('1'),
             'role' => 'admin',
             'created_user_id' => 1,
             'updated_user_id' => 1,
@@ -37,5 +37,6 @@ class DatabaseSeeder extends Seeder
         \App\Models\Setting::factory(10)->create();
         \App\Models\View::factory(10)->create();
         \App\Models\ActivityLog::factory(10)->create();
+        $this->call(MediaBannerSeeder::class);
     }
 }
