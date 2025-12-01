@@ -6,82 +6,76 @@ import {
   ArrowRight, 
   Star, 
   Users, 
-  Ticket, 
-  Search 
+  Search, 
+  Moon, 
+  Sun,
+  Clock
 } from "lucide-react";
 
-// Mock Data: Sự kiện nổi bật (Giả lập)
-const FEATURED_EVENTS = [
-  {
-    id: 1,
-    title: "Tech Summit Vietnam 2025",
-    date: "20/11/2025",
-    location: "TP. Hồ Chí Minh",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop",
-    price: "Miễn phí",
-    category: "Công nghệ"
-  },
-  {
-    id: 2,
-    title: "Music Festival: Summer Vibes",
-    date: "15/07/2025",
-    location: "Đà Nẵng",
-    image: "https://images.unsplash.com/photo-1459749411177-8c4750bb0e8f?q=80&w=2070&auto=format&fit=crop",
-    price: "500.000 VNĐ",
-    category: "Âm nhạc"
-  },
-  {
-    id: 3,
-    title: "Workshop: Art & Creative",
-    date: "05/09/2025",
-    location: "Hà Nội",
-    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=2071&auto=format&fit=crop",
-    price: "200.000 VNĐ",
-    category: "Nghệ thuật"
-  },
-  {
-    id: 4,
-    title: "Startup Networking Night",
-    date: "12/08/2025",
-    location: "Hà Nội",
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=2070&auto=format&fit=crop",
-    price: "Miễn phí",
-    category: "Kinh doanh"
-  }
-];
+// --- SWIPER IMPORTS ---
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
-// Mock Data: Danh mục
-const CATEGORIES = [
-  { name: "Công nghệ", icon: "💻" },
-  { name: "Âm nhạc", icon: "🎵" },
-  { name: "Thể thao", icon: "⚽" },
-  { name: "Giáo dục", icon: "📚" },
-  { name: "Nghệ thuật", icon: "🎨" },
-  { name: "Ẩm thực", icon: "🍔" },
-];
+// --- MOCK DATA ---
+// Tạo danh sách giả lập nhiều sự kiện để test chức năng Load More
+const ALL_EVENTS = Array.from({ length: 20 }).map((_, i) => ({
+    id: i + 1,
+    title: i % 2 === 0 ? `Sự kiện Lịch Dương ${i + 1}` : `Lễ Hội Lịch Âm ${i + 1}`,
+    date: i % 2 === 0 ? `20/${10 + (i%2)}/2025` : `15/${1 + (i%12)} (ÂL)`,
+    type: i % 2 === 0 ? 'solar' : 'lunar', // 'solar': Dương, 'lunar': Âm
+    location: i % 3 === 0 ? "Hà Nội" : (i % 3 === 1 ? "Đà Nẵng" : "TP.HCM"),
+    image: i % 2 === 0 
+        ? `https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2070&auto=format&fit=crop` // Ảnh sự kiện hiện đại
+        : `https://images.unsplash.com/photo-1533230676269-0744ebc4535c?q=80&w=2070&auto=format&fit=crop`, // Ảnh lễ hội truyền thống
+    price: i % 5 === 0 ? "Miễn phí" : `${(i + 1) * 50}.000 VNĐ`,
+    category: i % 2 === 0 ? "Công nghệ" : "Văn hóa"
+}));
+
+// Lấy 5 sự kiện mới nhất cho Slider
+const NEWEST_EVENTS = ALL_EVENTS.slice(0, 5);
 
 export default function Index() {
   const [user, setUser] = useState(null);
+  
+  // State cho bộ lọc và load more
+  const [activeTab, setActiveTab] = useState('solar'); // 'solar' | 'lunar'
+  const [visibleCount, setVisibleCount] = useState(6); // Mặc định hiện 6
+  const [filteredEvents, setFilteredEvents] = useState([]);
 
   useEffect(() => {
-    // Kiểm tra token đơn giản để xem trạng thái đăng nhập
+    // 1. Kiểm tra user (Giả lập)
     const token = localStorage.getItem("token");
     if (token) {
-      // Giả lập lấy thông tin user (hoặc gọi API thực tế ở đây)
       setUser({
-        name: "Bạn", // Có thể thay bằng tên thật từ API
+        name: "Bạn",
         avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
       });
     }
-  }, []);
+
+    // 2. Lọc sự kiện theo tab khi tab thay đổi
+    const filtered = ALL_EVENTS.filter(ev => ev.type === activeTab);
+    setFilteredEvents(filtered);
+    
+    // Reset lại số lượng hiển thị khi đổi tab
+    setVisibleCount(6);
+
+  }, [activeTab]);
+
+  // Hàm load thêm
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 3);
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
       
-      {/* ================= HERO SECTION ================= */}
+      {/* ================= 1. HERO BANNER ================= */}
       <section className="relative bg-white overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             
             {user ? (
@@ -103,7 +97,7 @@ export default function Index() {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-500 mb-10 leading-relaxed">
-              Nền tảng kết nối sự kiện hàng đầu. Tìm kiếm đam mê, kết nối cộng đồng và tạo ra những kỷ niệm đáng nhớ ngay hôm nay.
+              Nền tảng kết nối sự kiện hàng đầu. Tìm kiếm đam mê, kết nối cộng đồng và tạo ra những kỷ niệm đáng nhớ.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -114,98 +108,175 @@ export default function Index() {
                 <Search className="w-5 h-5 mr-2" />
                 Tìm sự kiện ngay
               </Link>
-              {!user && (
-                <Link 
-                  to="/register" 
-                  className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-bold rounded-xl shadow-sm transition flex items-center justify-center"
-                >
-                  Đăng ký tài khoản
-                </Link>
-              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================= CATEGORIES SECTION ================= */}
+      {/* ================= 2. NEWEST EVENTS SLIDER (CHẠY CHẠY) ================= */}
       <section className="py-12 bg-white border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h3 className="text-lg font-semibold text-gray-500 mb-6 uppercase tracking-wider text-center">Khám phá theo chủ đề</h3>
-            <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-                {CATEGORIES.map((cat, idx) => (
-                    <Link 
-                        key={idx} 
-                        to={`/search?category=${cat.name}`}
-                        className="flex items-center space-x-2 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 px-5 py-3 rounded-full transition-all cursor-pointer group"
-                    >
-                        <span className="text-xl group-hover:scale-110 transition-transform">{cat.icon}</span>
-                        <span className="font-medium text-gray-700 group-hover:text-blue-700">{cat.name}</span>
-                    </Link>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <Clock className="w-6 h-6 mr-2 text-blue-600" />
+                    Mới nhất vừa lên sóng
+                </h2>
+                <div className="hidden sm:flex gap-2">
+                    {/* Nút điều hướng custom nếu muốn, hoặc dùng mặc định của Swiper */}
+                </div>
+            </div>
+
+            <Swiper
+                modules={[Autoplay, Navigation, Pagination]}
+                spaceBetween={20}
+                slidesPerView={1}
+                navigation
+                pagination={{ clickable: true }}
+                autoplay={{ delay: 3000, disableOnInteraction: false }}
+                breakpoints={{
+                    640: { slidesPerView: 2 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 4 },
+                    1280: { slidesPerView: 5 }, // Hiện 5 cái trên màn hình lớn
+                }}
+                className="pb-10 px-2"
+            >
+                {NEWEST_EVENTS.map((event) => (
+                    <SwiperSlide key={event.id}>
+                        <Link to={`/event/${event.id}`} className="block group h-full">
+                            <div className="relative rounded-xl overflow-hidden aspect-[4/3]">
+                                <img 
+                                    src={event.image} 
+                                    alt={event.title} 
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                />
+                                <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">
+                                    NEW
+                                </div>
+                            </div>
+                            <div className="mt-3">
+                                <h3 className="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                    {event.title}
+                                </h3>
+                                <p className="text-xs text-gray-500 mt-1 flex items-center">
+                                    <Calendar className="w-3 h-3 mr-1" /> {event.date}
+                                </p>
+                            </div>
+                        </Link>
+                    </SwiperSlide>
                 ))}
-            </div>
+            </Swiper>
         </div>
       </section>
 
-      {/* ================= FEATURED EVENTS ================= */}
-      <section className="py-20 bg-gray-50">
+      {/* ================= 3. MAIN EVENTS LIST (PHÂN LOẠI & LOAD MORE) ================= */}
+      <section className="py-20 bg-gray-50" id="events-list">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-10">
+          
+          {/* Header & Filter Buttons */}
+          <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Sự kiện nổi bật</h2>
-              <p className="mt-2 text-gray-500">Đừng bỏ lỡ những sự kiện hấp dẫn nhất tuần này</p>
+              <h2 className="text-3xl font-bold text-gray-900">Khám phá sự kiện</h2>
+              <p className="mt-2 text-gray-500">Lựa chọn loại lịch phù hợp với nhu cầu của bạn</p>
             </div>
-            <Link to="/search" className="hidden sm:flex items-center text-blue-600 font-semibold hover:text-blue-700 transition">
-              Xem tất cả <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
+            
+            {/* Toggle Buttons */}
+            <div className="bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 flex">
+                <button 
+                    onClick={() => setActiveTab('solar')}
+                    className={`flex items-center px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                        activeTab === 'solar' 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'text-gray-500 hover:bg-gray-50'
+                    }`}
+                >
+                    <Sun className="w-4 h-4 mr-2" />
+                    Sự kiện Lịch Dương
+                </button>
+                <button 
+                    onClick={() => setActiveTab('lunar')}
+                    className={`flex items-center px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                        activeTab === 'lunar' 
+                        ? 'bg-indigo-600 text-white shadow-md' 
+                        : 'text-gray-500 hover:bg-gray-50'
+                    }`}
+                >
+                    <Moon className="w-4 h-4 mr-2" />
+                    Sự kiện Lịch Âm
+                </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {FEATURED_EVENTS.map((event) => (
-              <Link to={`/event/${event.id}`} key={event.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full">
-                {/* Image */}
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={event.image} 
-                    alt={event.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-blue-600 shadow-sm">
-                    {event.category}
-                  </div>
-                </div>
+          {/* Events Grid */}
+          {filteredEvents.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredEvents.slice(0, visibleCount).map((event) => (
+                  <Link to={`/event/${event.id}`} key={event.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full animate-in fade-in zoom-in duration-500">
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden">
+                      <img 
+                        src={event.image} 
+                        alt={event.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-blue-600 shadow-sm">
+                        {event.category}
+                      </div>
+                      <div className={`absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold text-white shadow-sm flex items-center ${event.type === 'lunar' ? 'bg-indigo-500' : 'bg-orange-500'}`}>
+                         {event.type === 'lunar' ? <Moon className="w-3 h-3 mr-1" /> : <Sun className="w-3 h-3 mr-1" />}
+                         {event.type === 'lunar' ? 'Âm lịch' : 'Dương lịch'}
+                      </div>
+                    </div>
 
-                {/* Content */}
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="flex items-center text-xs text-gray-500 mb-2 space-x-3">
-                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" /> {event.date}</span>
-                    <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" /> {event.location}</span>
-                  </div>
-                  
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                    {event.title}
-                  </h3>
+                    {/* Content */}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex items-center text-xs text-gray-500 mb-3 space-x-3">
+                        <span className="flex items-center font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                            <Calendar className="w-3 h-3 mr-1" /> {event.date}
+                        </span>
+                        <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" /> {event.location}</span>
+                      </div>
+                      
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {event.title}
+                      </h3>
 
-                  <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-blue-600 font-bold">{event.price}</span>
-                    <span className="text-xs text-gray-400 group-hover:translate-x-1 transition-transform flex items-center">
-                        Chi tiết <ArrowRight className="w-3 h-3 ml-1" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                      <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <span className="text-blue-600 font-bold text-lg">{event.price}</span>
+                        <span className="text-sm font-medium text-gray-400 group-hover:translate-x-1 transition-transform flex items-center group-hover:text-blue-600">
+                            Chi tiết <ArrowRight className="w-4 h-4 ml-1" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+          ) : (
+             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+                 <p className="text-gray-500">Chưa có sự kiện nào trong danh mục này.</p>
+             </div>
+          )}
 
-          {/* Mobile View All Button */}
-          <div className="mt-8 text-center sm:hidden">
-             <Link to="/search" className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 w-full justify-center">
-                Xem tất cả sự kiện
-             </Link>
-          </div>
+          {/* Load More Button */}
+          {visibleCount < filteredEvents.length && (
+            <div className="mt-12 text-center">
+                <button 
+                    onClick={handleLoadMore}
+                    className="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-bold rounded-full text-white bg-gray-900 hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                >
+                    Xem thêm sự kiện
+                    <ArrowRight className="ml-2 -mr-1 w-5 h-5" />
+                </button>
+                <p className="mt-3 text-sm text-gray-400">
+                    Đang hiển thị {Math.min(visibleCount, filteredEvents.length)} trên tổng số {filteredEvents.length} sự kiện
+                </p>
+            </div>
+          )}
+
         </div>
       </section>
 
-      {/* ================= STATS SECTION ================= */}
+      {/* ================= 4. STATS SECTION ================= */}
       <section className="py-16 bg-blue-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -233,24 +304,6 @@ export default function Index() {
                         <Star className="w-4 h-4 mr-1"/> Đánh giá
                     </div>
                 </div>
-            </div>
-        </div>
-      </section>
-
-      {/* ================= CALL TO ACTION ================= */}
-      <section className="py-20 bg-white text-center">
-        <div className="max-w-4xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Sẵn sàng tạo nên sự kiện của riêng bạn?</h2>
-            <p className="text-gray-500 mb-10 text-lg">
-                Đăng ký ngay để tổ chức sự kiện, quản lý vé và tiếp cận hàng ngàn người tham gia tiềm năng.
-            </p>
-            <div className="flex justify-center space-x-4">
-                 <button className="px-8 py-3 bg-gray-900 text-white font-bold rounded-lg hover:bg-gray-800 transition shadow-lg">
-                    Tổ chức sự kiện
-                 </button>
-                 <Link to="/contact" className="px-8 py-3 bg-white text-gray-900 border border-gray-300 font-bold rounded-lg hover:bg-gray-50 transition">
-                    Liên hệ tư vấn
-                 </Link>
             </div>
         </div>
       </section>
