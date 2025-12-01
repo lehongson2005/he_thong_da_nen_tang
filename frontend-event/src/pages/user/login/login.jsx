@@ -18,6 +18,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate(); // Khởi tạo useNavigate
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -120,15 +122,15 @@ export default function Login() {
                <p className="text-gray-400 text-sm mb-4">or use your account</p>
                <div className="flex justify-center gap-4">
                   {/* Social Buttons: Tròn, viền xám nhạt */}
-                  <button className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                  <a href={`${API_BASE_URL}/auth/facebook/redirect`} className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
                      <FaFacebookF size={14} />
-                  </button>
-                  <button className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                  </a>
+                  <a href={`${API_BASE_URL}/auth/google/redirect`} className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
                      <FaGoogle size={14} />
-                  </button>
-                  <button className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                  </a>
+                  <a href="#" className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all">
                      <FaLinkedinIn size={14} />
-                  </button>
+                  </a>
                </div>
             </div>
         </div>

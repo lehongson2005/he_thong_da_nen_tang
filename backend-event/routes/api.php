@@ -39,3 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 });
+use App\Http\Controllers\SocialiteController;
+
+Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirectToProvider']);
+Route::get('/auth/{provider}/callback', [SocialiteController::class, 'handleProviderCallback']);
