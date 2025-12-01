@@ -18,17 +18,14 @@ use App\Http\Controllers\MediaBannerController;
 Route::apiResource('events', EventController::class);
 
 Route::prefix('banners')->middleware(['auth:sanctum', 'role.admin'])->group(function () {
-    Route::get('/', [MediaBannerController::class, 'apiIndex']);
+    Route::post('/upload-image', [MediaBannerController::class, 'uploadImage']);
     Route::get('/active', [MediaBannerController::class, 'apiActive']);
     Route::get('/search', [MediaBannerController::class, 'search']);
-    Route::get('/{mediaBanner}', [MediaBannerController::class, 'apiShow']);
-    Route::post('/upload-image', [MediaBannerController::class, 'uploadImage']);
-    Route::post('/', [MediaBannerController::class, 'createBanner']);
-    Route::post('/{mediaBanner}', [MediaBannerController::class, 'updateBanner']);
-    Route::delete('/{mediaBanner}', [MediaBannerController::class, 'deleteBanner']);
     Route::post('/{id}/activate', [MediaBannerController::class, 'activate']);
     Route::post('/{id}/deactivate', [MediaBannerController::class, 'deactivate']);
 });
+
+Route::apiResource('banners', MediaBannerController::class)->middleware(['auth:sanctum', 'role.admin']);
 
 Route::apiResource('activity-logs', ActivityLogController::class);
 Route::apiResource('categories', CategoryController::class);

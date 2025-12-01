@@ -1,48 +1,65 @@
 import axios from "axios";
 
-// URL gốc của API backend Laravel
-const API_ROOT = import.meta.env.VITE_API_ORIGIN;
-const API_BASE = `${API_ROOT}/api/banners`;
+const API_URL = import.meta.env.VITE_API_BASE_URL; // ví dụ: http://localhost:8000/api
+const API_BASE = `${API_URL}/banners`;
 
 const BannerApi = {
-
+    // 🔹 Cấu hình headers với token từ localStorage hoặc sessionStorage
     getConfig: () => {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+        if (!token) {
+            console.error("❌ Token không tồn tại. Vui lòng đăng nhập.");
+            return { headers: {} };
+        }
         return {
             headers: {
-                Authorization: token ? `Bearer ${token}` : "",
+                Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
         };
     },
 
-    // =======================
+    // 🔹 UPLOAD ẢNH BANNER
+    uploadImage: async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append("media_image", file); // Đảm bảo tên trường là 'media_image'
+
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            if (!token) {
+                console.error("❌ Token không tồn tại. Vui lòng đăng nhập.");
+                return null;
+            }
+
+            const res = await axios.post(`${API_BASE}/upload-image`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data", // Quan trọng cho FormData
+                },
+            });
+            return res.data;
+        } catch (err) {
+            console.error("❌ Lỗi uploadImage:", err);
+            throw err; // Ném lỗi để FE xử lý
+        }
+    },
+
     // 🔹 LẤY TẤT CẢ BANNER
-    // =======================
     getAll: async () => {
         try {
             const res = await axios.get(API_BASE, BannerApi.getConfig());
-
-            // Chuẩn hóa URL ảnh
-            const dataWithAbsoluteUrls = res.data.map((b) => {
-                let imageUrl = b.media_image_url;
-
-                // Nếu đường dẫn chưa có http(s), nối thêm domain backend
-                if (imageUrl && !imageUrl.startsWith("http")) {
-                    imageUrl = `${API_ROOT}${imageUrl}`;
-                }
-
-                return {...b, media_image_url: imageUrl};
-            });
-
-            return dataWithAbsoluteUrls;
+            if (!Array.isArray(res.data)) {
+                console.error("❌ Dữ liệu API trả về không phải mảng.", res.data);
+                return [];
+            }
+            return res.data.map(b => ({ ...b, media_image_url: b.media_image_url }));
         } catch (err) {
             console.error("❌ Lỗi getAll:", err);
             return [];
         }
     },
 
-    //  LẤY THEO ID
+    // 🔹 LẤY THEO ID
     getById: async (id) => {
         try {
             const res = await axios.get(`${API_BASE}/${id}`, BannerApi.getConfig());
@@ -53,9 +70,7 @@ const BannerApi = {
         }
     },
 
-    // =======================
     // 🔹 TẠO BANNER
-    // =======================
     create: async (banner) => {
         try {
             const res = await axios.post(API_BASE, banner, BannerApi.getConfig());
@@ -66,32 +81,18 @@ const BannerApi = {
         }
     },
 
-    // =======================
     // 🔹 CẬP NHẬT BANNER
-    // =======================
     update: async (id, banner) => {
         try {
-            const token = localStorage.getItem("authToken");
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            if (!token) return null;
 
-            // Nếu có ảnh (file), gửi dưới dạng FormData
-            let dataToSend;
-            let headers;
+            let headers = {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json", // Luôn là application/json cho dữ liệu banner
+            };
 
-            if (banner instanceof FormData) {
-                dataToSend = banner;
-                headers = {
-                    Authorization: token ? `Bearer ${token}` : "",
-                    "Content-Type": "multipart/form-data",
-                };
-            } else {
-                dataToSend = banner;
-                headers = {
-                    Authorization: token ? `Bearer ${token}` : "",
-                    "Content-Type": "application/json",
-                };
-            }
-
-            const res = await axios.post(`${API_BASE}/${id}`, dataToSend, {headers});
+            const res = await axios.put(`${API_BASE}/${id}`, banner, { headers });
             return res.data;
         } catch (err) {
             console.error(`❌ Lỗi update(${id}):`, err);
@@ -99,9 +100,7 @@ const BannerApi = {
         }
     },
 
-    // =======================
     // 🔹 XOÁ BANNER
-    // =======================
     delete: async (id) => {
         try {
             const res = await axios.delete(`${API_BASE}/${id}`, BannerApi.getConfig());
@@ -111,9 +110,8 @@ const BannerApi = {
             return null;
         }
     },
-    // =======================
-// 🔹 KÍCH HOẠT / VÔ HIỆU HOÁ
-// =======================
+
+    // 🔹 KÍCH HOẠT / VÔ HIỆU HOÁ
     activate: async (id) => {
         try {
             const res = await axios.post(`${API_BASE}/${id}/activate`, {}, BannerApi.getConfig());
@@ -135,21 +133,13 @@ const BannerApi = {
     },
 
     toggleStatus: async (id, isActive) => {
-        if (isActive) {
-            return await BannerApi.deactivate(id);
-        } else {
-            return await BannerApi.activate(id);
-        }
+        return isActive ? await BannerApi.deactivate(id) : await BannerApi.activate(id);
     },
 
-
-
-    // =======================
     // 🔹 LẤY CÁC LOẠI DANH SÁCH
-    // =======================
     getActive: async () => {
         try {
-            const res = await axios.get(`${API_BASE}/active`);
+            const res = await axios.get(`${API_BASE}/active`, BannerApi.getConfig());
             return res.data;
         } catch (err) {
             console.error("❌ Lỗi getActive:", err);
@@ -157,55 +147,16 @@ const BannerApi = {
         }
     },
 
-    // =======================
     // 🔹 TÌM KIẾM BANNER
-    // =======================
     search: async (keyword) => {
         try {
-            const token = localStorage.getItem("authToken");
-            const res = await axios.get(`${API_BASE}/search?q=${encodeURIComponent(keyword)}`, {
-                headers: {
-                    Authorization: token ? `Bearer ${token}` : "",
-                    "Content-Type": "application/json",
-                },
-            });
-            return res.data; // server trả về mảng JSON banner
+            const res = await axios.get(`${API_BASE}/search?q=${encodeURIComponent(keyword)}`, BannerApi.getConfig());
+            return res.data;
         } catch (err) {
             console.error("❌ Lỗi search:", err);
             return [];
         }
     },
-
-    getActiveLimited: async (limit = 5) => {
-        try {
-            const res = await axios.get(`${API_BASE}/active-limited?limit=${limit}`, BannerApi.getConfig());
-            return res.data;
-        } catch (err) {
-            console.error("❌ Lỗi getActiveLimited:", err);
-            return [];
-        }
-    },
-
-    getUpcoming: async () => {
-        try {
-            const res = await axios.get(`${API_BASE}/upcoming`, BannerApi.getConfig());
-            return res.data;
-        } catch (err) {
-            console.error("❌ Lỗi getUpcoming:", err);
-            return [];
-        }
-    },
-
-    getExpired: async () => {
-        try {
-            const res = await axios.get(`${API_BASE}/expired`, BannerApi.getConfig());
-            return res.data;
-        } catch (err) {
-            console.error("❌ Lỗi getExpired:", err);
-            return [];
-        }
-    },
-
 };
 
 export default BannerApi;

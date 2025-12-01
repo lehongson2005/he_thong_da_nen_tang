@@ -30,16 +30,27 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register({ name, email, password });
+      const response = await register({ name, email, password });
       
-      toast.success("Account created! Redirecting to login...", {
-        autoClose: 2000,
-        position: "top-right"
-      });
+      if (response && response.accessToken) {
+        localStorage.setItem("token", response.accessToken);
+        toast.success("Account created! Redirecting to index..", {
+          autoClose: 2000,
+          position: "top-right"
+        });
 
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
+        setTimeout(() => {
+          window.location.href = "/"; // Redirect to dashboard or appropriate authenticated page
+        }, 2000);
+      } else {
+        // Handle cases where registration is successful but no token is returned (unlikely but good to handle)
+        toast.error(response.message || "Registration successful but no token received. Please try logging in.", {
+          position: "top-right",
+        });
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      }
 
     } catch (err) {
       toast.error(err.message || "Registration failed.", {

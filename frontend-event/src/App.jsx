@@ -16,6 +16,7 @@ import PrivacyPolicyPage from "./pages/user/static/PrivacyPolicyPage.jsx";
 // --- IMPORTS USER PAGES ---
 import Profile from "./pages/user/Profile.jsx"; // Import Profile component
 import AccountInfo from "./pages/user/AccountInfo.jsx"; // Import AccountInfo component
+import NotFoundPage from "./pages/NotFoundPage.jsx"; // Import NotFoundPage
 
 // --- IMPORTS ADMIN PAGES ---
 import BannerManager from "./pages/admin/DashboardBanner/BannerManager.jsx";
@@ -119,7 +120,7 @@ export default function App() {
 
 
         {/* Route 404 - Mặc định quay về trang chủ */}
-        <Route path="*" element={<Index />} />
+        <Route path="*" element={<NotFoundPage />} />
         
       </Routes>
     

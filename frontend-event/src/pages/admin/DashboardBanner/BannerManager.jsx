@@ -169,7 +169,7 @@ export default function BannerManager() {
               <h2 className="text-lg md:text-xl font-semibold">Quản lý banner</h2>
               <p className="text-sm text-gray-500">Quản lý và theo dõi tất cả banner</p>
             </div>
-            <Link to="/dashboard/banners/addbanner">
+            <Link to="/admin/banners/add">
               <Button className="w-full md:w-auto">+ Thêm banner</Button>
             </Link>
           </div>
@@ -241,7 +241,7 @@ export default function BannerManager() {
                     <td className="p-2 md:p-3 text-center hidden sm:table-cell">{b.updated}</td>
                     <td className="p-2 md:p-3">
                       <div className="flex justify-center items-center space-x-2">
-                        <Link to={`/dashboard/banners/editbanner/${b.id}`} className="text-blue-600 hover:text-blue-800 flex items-center" title="Chỉnh sửa">
+                        <Link to={`/admin/banners/edit/${b.id}`} className="text-blue-600 hover:text-blue-800 flex items-center" title="Chỉnh sửa">
                           <Edit2 size={18}/>
                         </Link>
                         <button

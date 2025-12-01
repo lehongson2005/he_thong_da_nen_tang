@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMediaBannerRequest;
+use App\Http\Requests\UpdateMediaBannerRequest;
 use App\Models\MediaBanner;
 use App\Models\Semester;
 use Illuminate\Http\Request;
@@ -15,7 +17,7 @@ class MediaBannerController extends Controller
     // ---------------- API -----------------
 
     // Lấy tất cả banner
-    public function apiIndex(): JsonResponse
+    public function index(): JsonResponse
     {
         $banners = MediaBanner::ordered()->get();
 
@@ -34,7 +36,7 @@ class MediaBannerController extends Controller
     }
 
     // Lấy 1 banner
-    public function apiShow(MediaBanner $mediaBanner): JsonResponse
+    public function show(MediaBanner $mediaBanner): JsonResponse
     {
         if ($mediaBanner->media_image_url && !str_starts_with($mediaBanner->media_image_url, 'http')) {
             $mediaBanner->media_image_url = asset('storage/' . ltrim($mediaBanner->media_image_url, 'public/'));
@@ -79,18 +81,9 @@ class MediaBannerController extends Controller
     /**
      * Thêm banner mới. Phương thức này nhận URL ảnh đã được upload trước đó.
      */
-    public function createBanner(Request $request): JsonResponse
+    public function store(StoreMediaBannerRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'media_title' => 'required|string|max:200',
-            'media_detail_link' => 'nullable|string|max:500',
-            'media_publish_from' => 'nullable|date',
-            'media_publish_to' => 'nullable|date|after_or_equal:media_publish_from',
-            'media_order' => 'integer|min:0',
-            // ⚠️ Thay đổi quan trọng: Nhận URL đã upload thay vì tệp ảnh
-            'media_image_url' => 'required|url|max:255',
-            'media_is_active' => 'required|boolean', // Frontend gửi 1 hoặc 0 (đã có trong FE)
-        ]);
+        $validated = $request->validated();
 
         try {
             // Tạo bản ghi
@@ -117,20 +110,9 @@ class MediaBannerController extends Controller
     }
 
     // Cập nhật banner (có thể đổi ảnh mới hoặc giữ nguyên URL cũ)
-    public function updateBanner(MediaBanner $mediaBanner, Request $request): JsonResponse
+    public function update(MediaBanner $mediaBanner, UpdateMediaBannerRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'media_title' => 'required|string|max:200',
-            'media_detail_link' => 'nullable|string|max:500',
-            'media_publish_from' => 'nullable|date',
-            'media_publish_to' => 'nullable|date|after_or_equal:media_publish_from',
-            'media_is_active' => 'boolean',
-            'media_order' => 'integer|min:0',
-            // Thay đổi quan trọng: Giữ lại để xử lý upload trong 1 bước nếu cần,
-            // nhưng khuyến nghị FE nên dùng luồng 2 bước
-            'media_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-            'media_image_url' => 'nullable|url|max:255', // Nhận URL nếu FE gửi
-        ]);
+        $validated = $request->validated();
 
         try {
             $updateData = [
@@ -175,7 +157,7 @@ class MediaBannerController extends Controller
     }
 
     // Xóa banner
-    public function deleteBanner(MediaBanner $mediaBanner): JsonResponse
+    public function destroy(MediaBanner $mediaBanner): JsonResponse
     {
         // Xóa file ảnh nếu có
         if ($mediaBanner->media_image_url) {

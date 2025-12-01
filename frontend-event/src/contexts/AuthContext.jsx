@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { login as loginUserApi, register as registerUserApi, logout as logoutUserApi } from '../api/authApi';
 import { getMe, logout as apiLogout } from '../api/authApi'; // Import apiLogout
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 import { toast } from 'react-hot-toast'; // For notifications
